@@ -26,10 +26,22 @@ class CardProfilePicture extends React.Component {
         let objectRatio = objectSize.naturalWidth / objectSize.naturalHeight;
         let originalRatio = 330 / 400;
 
+        if(objectRatio < originalRatio) {
+            this.state.cardImgClass = 'poke-card-img reactEasyCrop_Cover_Horizontal';
+        }
+        if(objectRatio >= originalRatio) {
+            this.state.cardImgClass = 'poke-card-img reactEasyCrop_Cover_Vertical';
+        }
+
         if((objectRatio < originalRatio) && (this.state.objectFit !== 'horizontal-cover')) {
             this.state.objectFit = "horizontal-cover";
-            this.state.cardImgClass = 'poke-card-img reactEasyCrop_Cover_Horizontal';
             this.setState(this.state);
+            this.forceUpdate();
+        }
+        if((objectRatio >= originalRatio) && (this.state.objectFit !== 'vertical-cover')) {
+            this.state.objectFit = "vertical-cover";
+            this.setState(this.state);
+            this.forceUpdate();
         }
 
     }

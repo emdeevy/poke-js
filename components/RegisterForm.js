@@ -6,17 +6,26 @@ class RegisterForm extends React.Component {
         super(_props);
 
         this.fileInput = React.createRef();
+        this.passwordInput = React.createRef();
 
         this.uploaderClick = this.uploaderClick.bind(this);
         this.uploaderChange = this.uploaderChange.bind(this);
         this.profilePictureCrop = this.profilePictureCrop.bind(this);
         this.doneCropClick = this.doneCropClick.bind(this);
+        this.registerSubmit = this.registerSubmit.bind(this);
 
         this.state = {
             src: '../../img/user/default.jpg',
             type: 'register',
             uploaderValue: 'Upload Profile Picture',
             cropValues: { percentages: { x: 0, y:0, width:0, height:0 }, pixels: { x: 0, y:0, width:0, height:0 } },
+            inputs: {
+                firstname: { valid: false, focus: false },
+                lastname: { valid: false, focus: false },
+                email: { valid: false, focus: false },
+                password: { valid: false, focus: false },
+                password2: { valid: false, focus: false }
+            }
         };
     }
 
@@ -24,10 +33,6 @@ class RegisterForm extends React.Component {
         this.state.cropValues.percentages = _dataPe;
         this.state.cropValues.pixels = _dataPi;
         this.setState(this.state);
-    }
-
-    emailChange(_event) {
-
     }
 
     uploaderClick() {
@@ -49,6 +54,48 @@ class RegisterForm extends React.Component {
         this.setState(this.state);
     }
 
+    registerSubmit(_event) {
+        if(!( this.state.inputs.firstname.valid && this.state.inputs.lastname.valid && this.state.inputs.email.valid && this.state.inputs.password.valid && this.state.inputs.password2.valid )) { _event.preventDefault(); }
+    }
+
+    triggerFocus(_event, name) {
+        this.state.inputs[name].focus = true;
+        this.setState(this.state);
+    }
+
+    triggerBlur(_event, name) {
+        this.state.inputs[name].focus = false;
+        this.setState(this.state);
+    }
+
+    validateInput(_event, name) {
+
+        let value = _event.target.value;
+
+        switch(name) {
+            case 'firstname':
+                if(/^[a-zA-Z]+$/.test(value) && value.length > 1) { this.state.inputs.firstname.valid = true; }
+                break;
+            case 'lastname':
+                if(/^[a-zA-Z]+$/.test(value) && value.length > 1) { this.state.inputs.lastname.valid = true; }
+                break;
+            case 'email':
+                if(/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(value)) { this.state.inputs.email.valid = true; }
+                break;
+            case 'password':
+                if(value.length > 7) { this.state.inputs.password.valid = true; }
+                break;
+            case 'password2':
+                if(value === this.passwordInput.current.value) { this.state.inputs.password2.valid = true; }
+                break;
+
+        }
+
+        this.setState(this.state);
+
+    }
+
+
     render() {
 
         let topLevelControls;
@@ -67,7 +114,7 @@ class RegisterForm extends React.Component {
         return (
             <div className='inside-register-container p-2'>
                 <CardProfilePicture type={this.state.type} onCrop={this.profilePictureCrop} src={this.state.src} cropValues={this.state.cropValues} />
-                <form className='register-form' action='/?command=register' method='post'>
+                <form onSubmit={this.registerSubmit} className='register-form' action='/?command=register' method='post' encType='multipart/form-data'>
                     <div className='register-top-inputs-aligner d-flex align-items-start'>
                         <div className='register-inputs-wrapper'>
                             <div onClick={this.uploaderClick} className='poke-upload-button'>{this.state.uploaderValue}</div>
@@ -92,17 +139,17 @@ class RegisterForm extends React.Component {
                     <div className='register-bottom-inputs-aligner d-flex align-items-end'>
                         <div className='register-inputs-wrapper'>
                             <div className='register-name-input-wrapper register-input-wrapper d-flex justify-content-start'>
-                                <input name='first_name' className='register-firstname-input register-text-input' type="text" placeholder="First Name..." />
-                                <input name='last_name' className='register-lastname-input register-text-input' type="text" placeholder="Last Name..." />
+                                <input autoComplete='off' name='first_name' onFocus={_e => this.triggerFocus(_e, 'firstname')} onBlur={_e => this.triggerBlur(_e, 'firstname')} onChange={_e => this.validateInput(_e, 'firstname')} className={`register-firstname-input register-text-input ${this.state.inputs.firstname.focus && !this.state.inputs.firstname.valid ? 'red-input' : ''}`} type="text" placeholder="First Name..." />
+                                <input autoComplete='off' name='last_name' onFocus={_e => this.triggerFocus(_e, 'lastname')} onBlur={_e => this.triggerBlur(_e, 'lastname')} onChange={_e => this.validateInput(_e, 'lastname')} className={`register-lastname-input register-text-input ${this.state.inputs.lastname.focus && !this.state.inputs.lastname.valid ? 'red-input' : ''}`} type="text" placeholder="Last Name..." />
                             </div>
                             <div className='register-name-input-wrapper register-input-wrapper'>
-                                <input name='email' className='register-email-input register-text-input mb-1' type="text" placeholder="Email..." onChange={this.emailChange} />
+                                <input autoComplete='off' name='email' onFocus={_e => this.triggerFocus(_e, 'email')} onBlur={_e => this.triggerBlur(_e, 'email')} onChange={_e => this.validateInput(_e, 'email')} className={`register-email-input register-text-input mb-1 ${this.state.inputs.email.focus && !this.state.inputs.email.valid ? 'red-input' : ''}`} type="text" placeholder="Email..." />
                             </div>
                             <div className='register-password-input-wrapper register-input-wrapper'>
-                                <input name='password' className='register-password-input register-text-input' type="password" placeholder="Password..." />
+                                <input ref={this.passwordInput} name='password' onFocus={_e => this.triggerFocus(_e, 'password')} onBlur={_e => this.triggerBlur(_e, 'password')} onChange={_e => this.validateInput(_e, 'password')} className={`register-password-input register-text-input ${this.state.inputs.password.focus && !this.state.inputs.password.valid ? 'red-input' : ''}`} type="password" placeholder="Password..." />
                             </div>
                             <div className='register-password2-input-wrapper register-input-wrapper mb-1'>
-                                <input name='password2' className='register-password2-input register-text-input' type="password" placeholder="Confirm Password..." />
+                                <input name='password2' onFocus={_e => this.triggerFocus(_e, 'password2')} onBlur={_e => this.triggerBlur(_e, 'password2')} onChange={_e => this.validateInput(_e, 'password2')} className={`register-password2-input register-text-input ${this.state.inputs.password2.focus && !this.state.inputs.password2.valid ? 'red-input' : ''}`} type="password" placeholder="Confirm Password..." />
                             </div>
 
                             <div className='register-submit-input-wrapper register-input-wrapper'>
