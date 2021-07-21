@@ -17,6 +17,7 @@ class LoginForm extends React.Component {
         this.triggerFocus = this.triggerFocus.bind(this);
         this.triggerBlur = this.triggerBlur.bind(this);
         this.triggerChange = this.triggerChange.bind(this);
+        this.loginSubmit = this.loginSubmit.bind(this);
     }
 
     toggleRememberMe() {
